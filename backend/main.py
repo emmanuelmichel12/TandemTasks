@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Depends
-from database import engine
-from sqlalchemy import text
 from auth import require_auth
+from database import get_connection
+from routes import users
 
 app = FastAPI()
+app.include_router(users.router)
 
 
 @app.get("/")
@@ -13,10 +14,15 @@ def root():
 
 @app.get("/db-test")
 def test_database():
-    with engine.connect() as connection:
-        result = connection.execute(text("SELECT 1"))
-        return {"database": "connected", "result": result.scalar()}
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            result = cursor.fetchone()
 
+    return {
+        "database": "connected",
+        "result": result[0]
+    }
 
 @app.get("/protected")
 
