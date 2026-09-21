@@ -47,7 +47,7 @@ def create_task(task: TaskCreate, auth = Depends(require_auth)):
                 """
                 INSERT INTO tasks ( title, task_description, workspace_id, assigned_to, created_by)
                 VALUES (%s, %s, %s, %s, %s)
-                RETURNING id, title, task_description, workspace_id, assigned_to, tasked_status, created_by
+                RETURNING id, title, task_description, workspace_id, assigned_to, task_status, created_by
                 """,
                 (task.title, task.task_description, task.workspace_id,
                  task.assigned_to, created_by)

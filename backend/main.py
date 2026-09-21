@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Depends
 from auth import require_auth
 from database import get_connection
-from routes import users
+from routes import users, workspaces, tasks
 
 app = FastAPI()
 app.include_router(users.router)
+app.include_router(workspaces.router)
+app.include_router(tasks.router)
 
 
 @app.get("/")
