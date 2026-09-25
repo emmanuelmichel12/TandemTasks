@@ -14,11 +14,25 @@ async def workspace_socket(websocket: WebSocket, workspace_id: int):
         await websocket.close(code=4401)
         return
 
-    await websocket.accept()
-    manager.connect(workspace_id, websocket)
+    user = {"id": auth_state.payload["sub"]}
+
+    await manager.connect(workspace_id, websocket, user)
+
+    await websocket.send_json({
+        "event": "presence_snapshot",
+        "users": manager.get_workspace_users(workspace_id)
+    })
+    await manager.broadcast(workspace_id, {
+        "event": "user_joined",
+        "user": user
+    })
 
     try:
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(workspace_id, websocket)
+        await manager.broadcast(workspace_id, {
+            "event": "user_left",
+            "user_id": user["id"]
+        })
